@@ -17,5 +17,12 @@ const remove = (id: number) => {
   localStorage.setItem("jokes", JSON.stringify(filtered));
 };
 
-export const localStorageUtils = { get, add, remove };
+const refresh = (id: number, newJoke: Joke) => {
+  const jokes = get();
+  const index = jokes.findIndex((joke) => joke.id === id);
+  jokes[index] = newJoke;
+  localStorage.setItem("jokes", JSON.stringify(jokes));
+};
+
+export const localStorageUtils = { get, add, remove, refresh };
 

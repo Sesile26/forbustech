@@ -86,6 +86,7 @@ export const addRandomJoke = createAsyncThunk<
       } while (existingIds.has(joke.id));
 
       console.log(joke, "joke");
+      localStorageUtils.add(joke)
       return joke;
     } catch {
       return thunkAPI.rejectWithValue("Failed to add joke");
@@ -93,12 +94,23 @@ export const addRandomJoke = createAsyncThunk<
   }
 );
 
-export const refreshJoke = createAsyncThunk(
+export const refreshJoke = createAsyncThunk<
+  { id: number; newJoke: Joke },
+  number,
+  { rejectValue: string; state: { jokes: JokesState } }
+>(
   "jokes/refresh",
   async (id: number, thunkAPI) => {
+    const state = thunkAPI.getState();
+    const existingIds = new Set(state.jokes.jokes.map(j => j.id));
+
     try {
-      const joke = await jokesApi.getRandomJoke();
-      console.log(joke, "refreshed joke")
+      let joke: Joke | null = null;
+      do {
+        joke = await jokesApi.getRandomJoke();
+      } while (existingIds.has(joke.id));
+
+      localStorageUtils.refresh(id, joke);
       return { id, newJoke: joke };
     } catch {
       return thunkAPI.rejectWithValue("Failed to refresh joke");
@@ -126,7 +138,6 @@ const jokesStore = createSlice({
   
     handleAsyncThunk(builder, addRandomJoke, "add", (state, action) => {
       state.jokes.push(action.payload);
-      localStorageUtils.add(action.payload)
     });
   
     handleAsyncThunk(builder, refreshJoke, "refresh", (state, action) => {

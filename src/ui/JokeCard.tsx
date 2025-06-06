@@ -109,6 +109,7 @@ export default function JokeCard({ joke }: JokeCardProps) {
           color="primary"
           variant="contained"
           onClick={handleRefresh}
+          disabled={isRefreshing}
         >
           Refresh
         </Button>
